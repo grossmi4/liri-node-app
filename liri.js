@@ -15,9 +15,13 @@ const spotifySearch = function (search) {
       query: search,
       limit: 2
     }).then(function (response) {
-    let songs = response.tracks.items
+    let songs = response.tracks.items;
+    let artists = "";
     songs.forEach(song => {
-      console.log(`Artist(s): ${song.artists}`);
+      song.artists.forEach(artist=>{
+        artists += artist.name + " "
+        });
+      console.log(`Artist(s): ${artists}`);
       console.log(`Song Name: ${song.name}`);
       console.log(`Album: ${song.album.name}`)
       console.log(`Preview Link: ${song.external_urls.spotify}`)
@@ -60,28 +64,30 @@ const movieSearch = function(search) {
       console.log(`Plot: ${movie.Plot}`);
       console.log(`Actors: ${movie.Actors}`);
     })
-}
+};
+const functionSelect = function(cmd, arguments) {
+  if (cmd === "concert-this") {
+    bandSearch(encodeURI(arguments.slice(3)))
+  }
 
-//Bands in town lookup based on artist - displays venue detail to terminal
-if(cmd === "concert-this"){
-  bandSearch(encodeURI(process.argv.slice(3)))
-}
+  else if (cmd === "spotify-this-song") {
+    spotifySearch(arguments.slice(3))
+  }
 
-else if (cmd === "spotify-this-song") {
-  spotifySearch(process.argv.slice(3))
-}
+  else if (cmd === "movie-this") {
+    movieSearch(encodeURI(arguments.slice(3)))
+  }
 
-else if (cmd === "movie-this"){
-  movieSearch(encodeURI(process.argv.slice(3)))
-}
+  else if (cmd === "do-what-it-says"){
+    fs.readFile("random.txt", "utf8", function(error, data) {
+      if(error) {
+        return console.log(error);
+      }
+      const arguments = data.split(", ");
+      arguments.unshift("placeholder","placeholder");
+      return functionSelect(arguments[2],arguments)
+    })
+  }
+};
 
-else if (cmd === "do-what-it-says"){
-  fs.readFile("random.txt", "utf8", function(error, data) {
-    if(error) {
-      return console.log(error);
-    }
-    
-    spotifySearch(data.s);
-  })
-}
-
+functionSelect(cmd,process.argv);
